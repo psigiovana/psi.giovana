@@ -44,9 +44,9 @@ const btn = document.getElementById("btnEnviar");
 const pdfViewer = document.getElementById("pdfViewer");
 const contato = "5544997112467"; // WhatsApp destino
 
-// === Gerar hash de 4 dígitos para nome único ===
+// === Gerar hash de 4 dígitos ===
 function gerarHash4() {
-  return Math.floor(1000 + Math.random() * 9000);
+  return Math.floor(1000 + Math.random() * 9000); // Ex: 4827
 }
 
 // === Submissão do formulário ===
@@ -66,7 +66,6 @@ form.addEventListener("submit", async (e) => {
   dadosGlobais = dados;
 
   try {
-    // Carregar PDF
     const res = await fetch("Contrato.pdf");
     if (!res.ok) throw new Error("Contrato.pdf não encontrado");
     const existingPdfBytes = await res.arrayBuffer();
@@ -77,7 +76,7 @@ form.addEventListener("submit", async (e) => {
     const firstPage = pages[0];
     const { height } = firstPage.getSize();
 
-    // Preencher campos no PDF
+    // Preenche campos no PDF
     firstPage.drawText(dados.nome, { x:130, y:height-248, size:12, font });
     if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-268, size:12, font });
     firstPage.drawText(dados.cpf, { x:360, y:height-270, size:12, font });
@@ -86,6 +85,7 @@ form.addEventListener("submit", async (e) => {
     firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:100, size:12, font });
     firstPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:85, size:12, font });
 
+    // Caso tenha mais de 1 página
     if(pages.length > 1){
       const secondPage = pages[1];
       const { height: h2 } = secondPage.getSize();
@@ -100,29 +100,25 @@ form.addEventListener("submit", async (e) => {
     const localUrl = URL.createObjectURL(pdfBlobGlobal);
     pdfViewer.src = localUrl;
 
-    // Nome do arquivo único
+    // === Nome do arquivo com hash ===
     const hash = gerarHash4();
     const nomeArquivo = `${hash}_${dados.nome.replace(/\s+/g, "_")}_Contrato.pdf`;
 
-    // Enviar para o backend seguro
+    // Converter para base64 e enviar ao GitHub
     const base64 = await blobParaBase64(pdfBlobGlobal);
-    await fetch("/upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nomeArquivo, conteudoBase64: base64 })
-    });
+    await enviarContratoParaGitHub(nomeArquivo, base64);
 
-    // Download automático
+    // 🔽 Download automático
     const downloadLink = document.createElement('a');
     downloadLink.href = localUrl;
     downloadLink.download = nomeArquivo;
     downloadLink.click();
 
-    // WhatsApp
+    // Enviar pelo WhatsApp
     const msg = encodeURIComponent(`Olá Giovana, segue o contrato assinado por ${dados.nome}`);
     window.open(`https://wa.me/${contato}?text=${msg}`, "_blank");
 
-    alert("✅ Contrato assinado, enviado ao GitHub e baixado com sucesso!");
+    alert("✅ Contrato assinado, salvo, enviado ao GitHub e baixado com sucesso!");
 
   } catch (err) {
     alert("Erro: " + err.message);
@@ -141,6 +137,34 @@ function blobParaBase64(blob) {
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
+}
+
+// Enviar para o GitHub
+async function enviarContratoParaGitHub(nomeArquivo, conteudoBase64) {
+  const repo = "psigiovana/contratos-assinados"; // altere para o seu
+  const token = "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"; // ⚠️ use token com permissão limitada (public_repo)
+  const url = `https://api.github.com/repos/${repo}/contents/contratos/${nomeArquivo}`;
+
+  const resposta = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Authorization": `token ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `Adicionando contrato assinado: ${nomeArquivo}`,
+      content: conteudoBase64
+    })
+  });
+
+  if (!resposta.ok) {
+    const erro = await resposta.json();
+    console.error(erro);
+    throw new Error("Falha ao enviar para o GitHub.");
+  }
+
+  const resultado = await resposta.json();
+  console.log("✅ Upload concluído:", resultado);
 }
 </script>
 </body>
