@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Contrato Psicóloga Giovana CRP:08/45995</title>
+<title>TESTE Contrato Psicóloga Giovana CRP:08/45995</title>
 <style>
 body { font-family: Arial, sans-serif; background: #ffd9df; padding: 20px; text-align: center; }
 .container { background: #fff; padding: 20px; max-width: 600px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -33,12 +33,19 @@ iframe { width: 100%; height: 500px; border: 1px solid #ddd; margin-top: 15px; }
 </form>
 
 <iframe id="pdfViewer" src="Contrato.pdf"></iframe>
+<button id="shareBtn" style="margin-top:10px;">Compartilhar PDF pelo WhatsApp</button>
 </div>
 
 <script>
+let pdfBlobGlobal = null; // guarda o PDF gerado
+let dadosGlobais = null; // guarda os dados preenchidos
+
 const form = document.getElementById("formContrato");
 const btn = document.getElementById("btnEnviar");
 const pdfViewer = document.getElementById("pdfViewer");
+const contato = "5544997112467"; // número do WhatsApp com DDI
+const shareBtn = document.getElementById("shareBtn");
+
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -54,8 +61,9 @@ form.addEventListener("submit", async (e) => {
     telefone: document.getElementById("telefone").value.trim()
   };
 
+  dadosGlobais = dados; // salva para compartilhar depois
+
   try {
-    // Carrega PDF base
     const res = await fetch("Contrato.pdf");
     if (!res.ok) throw new Error("Contrato.pdf não encontrado");
     const existingPdfBytes = await res.arrayBuffer();
@@ -67,7 +75,6 @@ form.addEventListener("submit", async (e) => {
     const firstPage = pages[0];
     const { height } = firstPage.getSize();
 
-    // Preenche dados
     firstPage.drawText(dados.nome, { x:130, y:height-248, size:12, font });
     if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-268, size:12, font });
     firstPage.drawText(dados.cpf, { x:360, y:height-270, size:12, font });
@@ -85,23 +92,23 @@ form.addEventListener("submit", async (e) => {
       secondPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:85, size:12, font });
     }
 
-    // Gera PDF final
     const pdfBytes = await pdfDoc.save();
-    const blob = new Blob([pdfBytes], { type:"application/pdf" });
-    const localUrl = URL.createObjectURL(blob);
+    pdfBlobGlobal = new Blob([pdfBytes], { type:"application/pdf" });
+    const localUrl = URL.createObjectURL(pdfBlobGlobal);
     pdfViewer.src = localUrl;
 
     // Download automático
     const a = document.createElement("a");
     a.href = localUrl;
-    a.download = `${dados.nome.replace(/\s+/g,'_')}_Contrato.pdf`;
+    a.download = `${dados.nome.replace(/\s+/g,' ')}_Contrato.pdf`;
     document.body.appendChild(a);
     a.click();
     a.remove();
 
-    // Envio via WhatsApp (mensagem simples)
-    const msgInicial = encodeURIComponent(`Olá Giovana, o contrato foi assinado por ${dados.nome}.`);
-    window.open(`https://wa.me/5544997112467?text=${msgInicial}`, "_blank");
+    // WhatsApp com mensagem inicial e link para o PDF gerado
+    const urlPdf = localUrl;
+    const msgLink = encodeURIComponent(`Olá Giovana, segue o contrato assinado por ${dados.nome}`);
+    window.open(`https://wa.me/${contato}?text=${msgLink}`, "_blank");
 
   } catch (err) {
     console.error("❌ Erro:", err);
@@ -109,6 +116,31 @@ form.addEventListener("submit", async (e) => {
   } finally {
     btn.disabled = false;
     btn.textContent = originalText;
+  }
+});
+
+// Compartilhar PDF via Web Share API
+shareBtn.addEventListener("click", async () => {
+  if(!pdfBlobGlobal){
+    alert("Primeiro assine o contrato para gerar o PDF.");
+    return;
+  }
+  const file = new File([pdfBlobGlobal], `${dadosGlobais.nome}_Contrato_Assinado.pdf`, { type: "application/pdf" });
+
+  if(!navigator.canShare || !navigator.canShare({ files: [file] })){
+    alert("Compartilhamento de arquivos não suportado neste navegador.");
+    return;
+  }
+
+  try{
+    await navigator.share({
+      files: [file],
+      title: "Contrato Assinado",
+      text: "Segue o contrato assinado."
+    });
+    console.log("Share dialog aberto");
+  } catch(err){
+    console.error("Compartilhamento cancelado ou erro:", err);
   }
 });
 </script>
