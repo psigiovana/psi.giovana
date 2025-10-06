@@ -46,7 +46,7 @@ const contato = "5544997112467"; // WhatsApp destino
 
 // === Gerar hash de 4 dígitos ===
 function gerarHash4() {
-  return Math.floor(1000 + Math.random() * 9000); // Ex: 4827
+  return Math.floor(1000 + Math.random() * 9000);
 }
 
 // === Submissão do formulário ===
@@ -85,7 +85,6 @@ form.addEventListener("submit", async (e) => {
     firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:100, size:12, font });
     firstPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:85, size:12, font });
 
-    // Caso tenha mais de 1 página
     if(pages.length > 1){
       const secondPage = pages[1];
       const { height: h2 } = secondPage.getSize();
@@ -104,12 +103,12 @@ form.addEventListener("submit", async (e) => {
     const hash = gerarHash4();
     const nomeArquivo = `${hash}_${dados.nome.replace(/\s+/g, "_")}_Contrato.pdf`;
 
-    // Converter para base64 e enviar ao GitHub
+    // Converter para base64 e enviar ao backend
     const base64 = await blobParaBase64(pdfBlobGlobal);
     await fetch("http://localhost:3000/upload", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ nomeArquivo, conteudoBase64: base64 })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nomeArquivo, conteudoBase64: base64 })
     });
 
     // 🔽 Download automático
@@ -141,34 +140,6 @@ function blobParaBase64(blob) {
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
-}
-
-// Enviar para o GitHub
-async function enviarContratoParaGitHub(nomeArquivo, conteudoBase64) {
-  const repo = "psigiovana/contratos-assinados"; // altere para o seu
-  const token = "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"; // ⚠️ use token com permissão limitada (public_repo)
-  const url = `https://api.github.com/repos/${repo}/contents/contratos/${nomeArquivo}`;
-
-  const resposta = await fetch(url, {
-    method: "PUT",
-    headers: {
-      "Authorization": `token ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message: `Adicionando contrato assinado: ${nomeArquivo}`,
-      content: conteudoBase64
-    })
-  });
-
-  if (!resposta.ok) {
-    const erro = await resposta.json();
-    console.error(erro);
-    throw new Error("Falha ao enviar para o GitHub.");
-  }
-
-  const resultado = await resposta.json();
-  console.log("✅ Upload concluído:", resultado);
 }
 </script>
 </body>
