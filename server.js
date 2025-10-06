@@ -1,47 +1,40 @@
 import express from "express";
-import fetch from "node-fetch"; // npm i node-fetch
-import bodyParser from "body-parser";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
 
+dotenv.config();
 const app = express();
-app.use(bodyParser.json({ limit: "10mb" })); // aceita PDF em base64
+app.use(express.json({ limit: "10mb" }));
 
-// ⚠️ Coloque o token aqui, mas **não no front-end**
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // coloque em .env
-const REPO = "psigiovana/contratos-assinados";
-const BRANCH = "main"; // ou master
+const token = process.env.GITHUB_TOKEN;
+const repo = "psigiovana/contratos-assinados";
+const branch = "main";
 
+// Rota para upload do PDF
 app.post("/upload", async (req, res) => {
   try {
     const { nomeArquivo, conteudoBase64 } = req.body;
+    const url = `https://api.github.com/repos/${repo}/contents/contratos/${nomeArquivo}`;
 
-    const url = `https://api.github.com/repos/${REPO}/contents/contratos/${nomeArquivo}`;
-    const response = await fetch(url, {
+    const resposta = await fetch(url, {
       method: "PUT",
       headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
+        Authorization: `token ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: `Adicionando contrato assinado: ${nomeArquivo}`,
+        message: `Adicionando contrato: ${nomeArquivo}`,
         content: conteudoBase64,
-        branch: BRANCH,
+        branch,
       }),
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json(data);
-    }
-
-    res.json({ ok: true, data });
+    const resultado = await resposta.json();
+    res.json(resultado);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ ok: false, error: err.message });
+    res.status(500).json({ erro: "Falha no upload" });
   }
 });
 
-app.listen(3000, () => console.log("Servidor rodando na porta 3000"));
-// Agora, no front-end, você faria uma requisição para /upload em vez de diretamente para o GitHub
-// Exemplo de requisição no front-end:
-// fetch('/upload', {
+app.listen(3000, () => console.log("✅ Servidor rodando em http://localhost:3000"));
