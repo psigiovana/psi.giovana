@@ -79,7 +79,7 @@ form.addEventListener("submit", async (e) => {
     // Preenche campos no PDF
     firstPage.drawText(dados.nome, { x:130, y:height-258, size:12, font });
     if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-278, size:12, font });
-    firstPage.drawText(dados.cpf, { x:360, y:height-320, size:12, font });
+    firstPage.drawText(dados.cpf, { x:360, y:height-280, size:12, font });
     firstPage.drawText(dados.rg, { x:120, y:height-305, size:12, font });
     firstPage.drawText(dados.telefone, { x:380, y:height-303, size:12, font });
     firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:110, size:12, font });
@@ -144,6 +144,7 @@ function blobParaBase64(blob) {
 </script>
 </body>
 </html>
+
 
 
 
