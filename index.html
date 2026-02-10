@@ -8,7 +8,7 @@ body { font-family: Arial, sans-serif; background: #f3e8db; padding: 20px; text-
 .container { background: #fff; padding: 20px; max-width: 600px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
 input, button { padding: 10px; margin: 10px 0; width: 90%; border: 1px solid #ccc; border-radius: 5px; }
 button { background: #f3e8db; color: black; font-size: 15px; border: none; cursor: pointer; transition: 0.3s; }
-button:hover { background: #ffd9df; }
+button:hover { background: rgb(253, 219, 224); }
 button:disabled { background: #ccc; cursor: not-allowed; }
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid white; border-top: 2px solid #ffaddd; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -77,21 +77,21 @@ form.addEventListener("submit", async (e) => {
     const { height } = firstPage.getSize();
 
     // Preenche campos no PDF
-    firstPage.drawText(dados.nome, { x:130, y:height-248, size:12, font });
-    if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-268, size:12, font });
-    firstPage.drawText(dados.cpf, { x:360, y:height-270, size:12, font });
-    firstPage.drawText(dados.rg, { x:120, y:height-293, size:12, font });
-    firstPage.drawText(dados.telefone, { x:380, y:height-293, size:12, font });
-    firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:100, size:12, font });
-    firstPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:85, size:12, font });
+    firstPage.drawText(dados.nome, { x:130, y:height-258, size:12, font });
+    if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-278, size:12, font });
+    firstPage.drawText(dados.cpf, { x:360, y:height-260, size:12, font });
+    firstPage.drawText(dados.rg, { x:120, y:height-283, size:12, font });
+    firstPage.drawText(dados.telefone, { x:380, y:height-303, size:12, font });
+    firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:110, size:12, font });
+    firstPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:95, size:12, font });
 
     if(pages.length > 1){
       const secondPage = pages[1];
       const { height: h2 } = secondPage.getSize();
       secondPage.drawText(dados.nome, { x:250, y:h2-320, size:12, font });
-      secondPage.drawText(new Date().toLocaleDateString("pt-BR"), { x:230, y:h2-300, size:12, font });
-      secondPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:100, size:12, font });
-      secondPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:85, size:12, font });
+      secondPage.drawText(new Date().toLocaleDateString("pt-BR"), { x:230, y:h2-310, size:12, font });
+      secondPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:90, size:12, font });
+      secondPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:75, size:12, font });
     }
 
     const pdfBytes = await pdfDoc.save();
@@ -144,6 +144,7 @@ function blobParaBase64(blob) {
 </script>
 </body>
 </html>
+
 
 
 
