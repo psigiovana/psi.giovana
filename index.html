@@ -77,13 +77,13 @@ form.addEventListener("submit", async (e) => {
     const { height } = firstPage.getSize();
 
     // Preenche campos no PDF
-    firstPage.drawText(dados.nome, { x:80, y:height-258, size:12, font });
-    if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:130, y:height-278, size:12, font });
-    firstPage.drawText(dados.cpf, { x:310, y:height-280, size:12, font });
-    firstPage.drawText(dados.rg, { x:70, y:height-305, size:12, font });
-    firstPage.drawText(dados.telefone, { x:330, y:height-303, size:12, font });
-    firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:10, y:110, size:12, font });
-    firstPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:10, y:95, size:12, font });
+    firstPage.drawText(dados.nome, { x:130, y:130, size:12, font });
+    if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-278, size:12, font });
+    firstPage.drawText(dados.cpf, { x:360, y:height-280, size:12, font });
+    firstPage.drawText(dados.rg, { x:120, y:height-305, size:12, font });
+    firstPage.drawText(dados.telefone, { x:380, y:height-303, size:12, font });
+    firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:60, y:110, size:12, font });
+    firstPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:40, y:95, size:12, font });
 
     if(pages.length > 1){
       const secondPage = pages[1];
@@ -144,6 +144,7 @@ function blobParaBase64(blob) {
 </script>
 </body>
 </html>
+
 
 
 
