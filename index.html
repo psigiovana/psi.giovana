@@ -66,8 +66,8 @@ form.addEventListener("submit", async (e) => {
   dadosGlobais = dados;
 
   try {
-    const res = await fetch("Contrato.pdf");
-    if (!res.ok) throw new Error("Contrato.pdf não encontrado");
+    const res = await fetch("Contrato2.pdf");
+    if (!res.ok) throw new Error("Contrato2.pdf não encontrado");
     const existingPdfBytes = await res.arrayBuffer();
     const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
     const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
@@ -144,6 +144,7 @@ function blobParaBase64(blob) {
 </script>
 </body>
 </html>
+
 
 
 
