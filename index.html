@@ -77,7 +77,7 @@ form.addEventListener("submit", async (e) => {
     const { height } = firstPage.getSize();
 
     // Preenche campos no PDF
-    firstPage.drawText(dados.nome, { x:130, y:height-270, size:12, font });
+    firstPage.drawText(dados.nome, { x:130, y:height-268, size:12, font });
     if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-282, size:12, font });
     firstPage.drawText(dados.cpf, { x:360, y:height-284, size:12, font });
     firstPage.drawText(dados.rg, { x:120, y:height-309, size:12, font });
@@ -144,6 +144,7 @@ function blobParaBase64(blob) {
 </script>
 </body>
 </html>
+
 
 
 
