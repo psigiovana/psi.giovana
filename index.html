@@ -78,7 +78,7 @@ form.addEventListener("submit", async (e) => {
 
     // Preenche campos no PDF
     firstPage.drawText(dados.nome, { x:130, y:height-268, size:12, font });
-    if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-302, size:12, font });
+    if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-312, size:12, font });
     firstPage.drawText(dados.cpf, { x:360, y:height-304, size:12, font });
     firstPage.drawText(dados.rg, { x:120, y:height-329, size:12, font });
     firstPage.drawText(dados.telefone, { x:380, y:height-327, size:12, font });
@@ -144,6 +144,7 @@ function blobParaBase64(blob) {
 </script>
 </body>
 </html>
+
 
 
 
