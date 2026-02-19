@@ -1,173 +1,200 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Contrato Psicóloga Giovana CRP:08/45995</title>
-<style>
-body { font-family: Arial, sans-serif; background: #f3e8db; padding: 20px; text-align: center; }
-.container { background: #fff; padding: 20px; max-width: 600px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-input, button { padding: 10px; margin: 10px 0; width: 90%; border: 1px solid #ccc; border-radius: 5px; }
-button { background: #f3e8db; color: black; font-size: 15px; border: none; cursor: pointer; transition: 0.3s; }
-button:hover { background: #f7f7f7; }
-button:disabled { background: #ccc; cursor: not-allowed; }
-.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid white; border-top: 2px solid #ffaddd; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-iframe { width: 100%; height: 500px; border: 1px solid #ddd; margin-top: 15px; }
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Contrato Psicóloga Giovana CRP:08/45995</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f3e8db; padding: 20px; color: #333; }
+        .container { background: #fff; padding: 30px; max-width: 700px; margin: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header-img { max-width: 200px; margin-bottom: 20px; }
+        h2 { color: #8d6e63; margin-bottom: 25px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .full-width { grid-column: span 2; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border 0.3s; }
+        input:focus { border-color: #8d6e63; }
+        button { background: #8d6e63; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 20px; }
+        button:hover { background: #6d4c41; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        iframe { width: 100%; height: 600px; border: 1px solid #eee; border-radius: 8px; margin-top: 20px; background: #fafafa; }
+        .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin 1s ease-in-out infinite; margin-right: 10px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .label-preview { font-size: 13px; font-weight: bold; color: #8d6e63; margin-top: 20px; display: block; text-align: left; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
 </head>
 <body>
 
-<img src="banner_assinatura.png" alt="Banner de Assinatura" style="max-width: 30%;">
-<div class="container">
-<h2>Assinatura do Contrato de Psicoterapia</h2>
+    <div class="container">
+        <img src="banner_assinatura.png" alt="Logo" class="header-img">
+        <h2>Contrato de Psicoterapia</h2>
+        
+        <form id="formContrato">
+            <div class="form-grid">
+                <input type="text" id="nome" class="full-width" placeholder="Nome Completo" required>
+                <input type="text" id="nomeSocial" placeholder="Nome Social (opcional)">
+                <input type="text" id="cpf" placeholder="CPF" required>
+                <input type="text" id="rg" placeholder="RG" required>
+                <input type="text" id="telefone" placeholder="WhatsApp" required>
+            </div>
 
-<form id="formContrato">
-  <input type="text" id="nome" placeholder="Nome completo" required>
-  <input type="text" id="nomeSocial" placeholder="Nome social (opcional)">
-  <input type="text" id="cpf" placeholder="CPF" required>
-  <input type="text" id="rg" placeholder="RG" required>
-  <input type="text" id="telefone" placeholder="Telefone / WhatsApp" required>
-  <button type="submit" id="btnEnviar">Assinar e Enviar</button>
-</form>
+            <label class="label-preview">PRÉ-VISUALIZAÇÃO DO CONTRATO:</label>
+            <iframe id="pdfViewer"></iframe>
 
-<iframe id="pdfViewer" src="Contrato2.pdf"></iframe>
-</div>
+            <button type="submit" id="btnEnviar">ASSINAR E ENVIAR AGORA</button>
+        </form>
+    </div>
 
 <script>
-let pdfBlobGlobal = null;
-let dadosGlobais = null;
+    const pdfViewer = document.getElementById("pdfViewer");
+    const form = document.getElementById("formContrato");
+    const btn = document.getElementById("btnEnviar");
+    const contato = "5544997112467";
 
-const form = document.getElementById("formContrato");
-const btn = document.getElementById("btnEnviar");
-const pdfViewer = document.getElementById("pdfViewer");
-const contato = "5544997112467"; // WhatsApp destino
+    function wrapText(text, maxWidth, font, fontSize) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
 
-// === Gerar hash de 4 dígitos ===
-function gerarHash5() {
-  return Math.floor(10000 + Math.random() * 9000);
-}
-
-// === Submissão do formulário ===
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.innerHTML = '<span class="spinner"></span>Gerando...';
-
-  const dados = {
-    nome: document.getElementById("nome").value.trim(),
-    nomeSocial: document.getElementById("nomeSocial").value.trim(),
-    cpf: document.getElementById("cpf").value.trim(),
-    rg: document.getElementById("rg").value.trim(),
-    telefone: document.getElementById("telefone").value.trim()
-  };
-  dadosGlobais = dados;
-
-  try {
-    const res = await fetch("Contrato2.pdf");
-    if (!res.ok) throw new Error("Contrato2.pdf não encontrado");
-    const existingPdfBytes = await res.arrayBuffer();
-    const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-    const { height } = firstPage.getSize();
-
-     // Preenche campos no PDF
-    firstPage.drawText(dados.nome, { x:130, y:height-268, size:12, font });
-    if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-288, size:12, font });
-    firstPage.drawText(dados.cpf, { x:360, y:height-290, size:12, font });
-    firstPage.drawText(dados.rg, { x:120, y:height-303, size:12, font });
-    firstPage.drawText(dados.telefone, { x:380, y:height-313, size:12, font });
-    firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:80, size:12, font });
-    firstPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:65, size:12, font });
-
-    if(pages.length > 1){
-      const secondPage = pages[1];
-      const { height: h2 } = secondPage.getSize();
-      secondPage.drawText(dados.nome, { x:250, y:h2-320, size:12, font });
-      secondPage.drawText(new Date().toLocaleDateString("pt-BR"), { x:230, y:h2-300, size:12, font });
-      secondPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:100, size:12, font });
-      secondPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:85, size:12, font });
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const width = font.widthOfTextAtSize(currentLine + ' ' + word, fontSize);
+            if (width < maxWidth) {
+                currentLine += ' ' + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
     }
 
-    const pdfBytes = await pdfDoc.save();
-    pdfBlobGlobal = new Blob([pdfBytes], { type:"application/pdf" });
-    const localUrl = URL.createObjectURL(pdfBlobGlobal);
-    pdfViewer.src = localUrl;
+    async function gerarPDF() {
+        const dados = {
+            nome: document.getElementById("nome").value.trim() || "________________________________",
+            social: document.getElementById("nomeSocial").value.trim() || "________________________",
+            cpf: document.getElementById("cpf").value.trim() || "___________",
+            rg: document.getElementById("rg").value.trim() || "___________",
+            tel: document.getElementById("telefone").value.trim() || "___________",
+            data: new Date().toLocaleDateString("pt-BR")
+        };
 
-    // === Nome do arquivo com hash ===
-    const hash = gerarHash5();
-    const nomeArquivo = `${hash}_${dados.nome.replace(/\s+/g, "_")}_Contrato.pdf`;
+        const pdfDoc = await PDFLib.PDFDocument.create();
+        const fontReg = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+        const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
 
-    // Converter para base64 e enviar ao backend
-    const base64 = await blobParaBase64(pdfBlobGlobal);
-    await fetch("https://contratos-assinados.onrender.com/upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nomeArquivo, conteudoBase64: base64 })
+        const page = pdfDoc.addPage([595.28, 841.89]); // Tamanho A4 padrão
+        let y = 800;
+        const margin = 50;
+        const width = 495;
+
+        // Cabeçalho unificado
+        page.drawText('', { x: margin, y, size: 9, font: fontReg });
+        y -= 25;
+        page.drawText('CONTRATO DE PSICOTERAPIA', { x: 170, y, size: 14, font: fontBold });
+        y -= 30;
+
+        // Introdução
+        const intro = "Eu, Giovana de Morais, Psicóloga (CRP 08/45995), e você, paciente abaixo identificado(a), firmamos este acordo com o objetivo de estabelecer clareza e segurança em nosso processo terapêutico.";
+        wrapText(intro, width, fontReg, 10).forEach(line => {
+            page.drawText(line, { x: margin, y, size: 10, font: fontReg });
+            y -= 14;
+        });
+
+        y -= 15;
+        // Dados do Paciente
+        page.drawText('Dados do(a) Paciente:', { x: margin, y, size: 10, font: fontBold });
+        y -= 18;
+        page.drawText(`Nome: ${dados.nome}`, { x: margin, y, size: 10, font: fontReg });
+        y -= 14;
+        page.drawText(`Nome social: ${dados.social}   CPF: ${dados.cpf}`, { x: margin, y, size: 10, font: fontReg });
+        y -= 14;
+        page.drawText(`RG: ${dados.rg}   Telefone/WhatsApp: ${dados.tel}`, { x: margin, y, size: 10, font: fontReg });
+        y -= 25;
+
+        // Cláusulas (Todas juntas na mesma página)
+        const secoes = [
+            { t: "1. Sobre o atendimento:", c: "Nossas sessões de psicoterapia terão duração de aproximadamente 50 minutos e acontecerão semanalmente ou quinzenalmente em formato presencial em Maringá-PR ou on-line, conforme combinado." },
+            { t: "2. Valores e forma de pagamento:", c: "Cada sessão tem o valor de R$ 80,00 (social para estudantes e baixa renda) e R$100,00 valor convencional. O pagamento poderá ser realizado por: (PIX, Transferência ou Dinheiro). Sendo realizado até o dia 10 de cada mês, ou no dia das sessões." },
+            { t: "3. Cancelamentos e/ faltas:", c: "Para que nosso processo tenha continuidade e respeito ao tempo de ambos: Se precisar cancelar, avise com no mínimo 24 horas de antecedência. Cancelamentos fora desse prazo ou faltas sem aviso terão a cobrança integral da sessão." },
+            { t: "4. Sigilo e ética:", c: "Tudo o que você compartilhar nas sessões será mantido em sigilo absoluto, conforme previsto no Código de Ética Profissional do Psicólogo. Somente em situações previstas por lei (ex.: risco à sua vida ou à de terceiros) o sigilo poderá ser quebrado. Em relação a psicoterapia realizada online, é necessário que o ambiente seja tranquilo, silencioso e reservado. Use fones de ouvido para mais privacidade e concentração." },
+            { t: "5. Encerramento do processo:", c: "A psicoterapia é um processo construído em conjunto. Tanto você quanto eu podemos decidir pelo encerramento, sempre conversando abertamente sobre o momento mais adequado." },
+            { t: "6. Compromisso Mútuo:", c: "Este contrato não é apenas um documento, mas um acordo de confiança e respeito mútuo. Estamos aqui para construir um espaço seguro, acolhedor e transformador." }
+        ];
+
+        secoes.forEach(s => {
+            page.drawText(s.t, { x: margin, y, size: 10, font: fontBold });
+            y -= 14;
+            wrapText(s.c, width, fontReg, 9).forEach(line => {
+                page.drawText(line, { x: margin, y, size: 9, font: fontReg });
+                y -= 12; // Espaçamento menor entre as linhas do parágrafo
+            });
+            y -= 12; // Espaçamento entre uma cláusula e outra
+        });
+
+        y -= 15;
+        // Rodapé com Local e Data
+        page.drawText(`Local e data: Maringá, ${dados.data}`, { x: margin, y, size: 10, font: fontReg });
+        y -= 45;
+
+        // Linhas de Assinatura
+        page.drawLine({ start: { x: margin, y }, end: { x: 250, y }, thickness: 1 });
+        page.drawLine({ start: { x: 320, y }, end: { x: 520, y }, thickness: 1 });
+        y -= 15;
+        page.drawText('Assinatura do(a) Paciente', { x: margin + 20, y, size: 9, font: fontReg });
+        page.drawText('Giovana de Morais - CRP-08/45995', { x: 330, y, size: 9, font: fontReg });
+        y -= 15;
+        // Repete o nome do paciente abaixo da linha de assinatura para confirmação digital
+        //page.drawText(dados.nome, { x: margin, y, size: 8, font: fontBold });
+
+        const pdfBytes = await pdfDoc.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        pdfViewer.src = URL.createObjectURL(blob);
+        return blob;
+    }
+
+    form.addEventListener('input', () => {
+        gerarPDF();
     });
 
-    // Download automático
-    const downloadLink = document.createElement('a');
-    downloadLink.href = localUrl;
-    downloadLink.download = nomeArquivo;
-    downloadLink.click();
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Processando...';
+        
+        try {
+            const blob = await gerarPDF();
+            const nome = document.getElementById("nome").value;
+            const nomeArquivo = `Contrato_${nome.replace(/\s+/g, '_')}.pdf`;
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = async () => {
+                const base64 = reader.result.split(',')[1];
+                await fetch("https://contratos-assinados.onrender.com/upload", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nomeArquivo, conteudoBase64: base64 })
+                });
 
-    // Enviar pelo WhatsApp
-    const msg = encodeURIComponent(`Olá Giovana, segue o contrato assinado por ${dados.nome}`);
-    window.open(`https://wa.me/${contato}?text=${msg}`, "_blank");
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = nomeArquivo;
+                link.click();
 
-    alert("Contrato assinado, salvo, enviado ao GitHub e baixado com sucesso!");
+                window.open(`https://wa.me/${contato}?text=Olá Giovana, contrato assinado por ${nome}`, "_blank");
+                alert("Sucesso! Contrato enviado.");
+            };
+        } catch (e) {
+            alert("Erro ao processar.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "ASSINAR E ENVIAR AGORA";
+        }
+    });
 
-  } catch (err) {
-    alert("Erro: " + err.message);
-    console.error(err);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-});
-
-// Converter Blob → Base64
-function blobParaBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(",")[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
+    // Iniciar com preview vazio
+    window.onload = gerarPDF;
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
