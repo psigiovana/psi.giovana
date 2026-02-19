@@ -76,22 +76,22 @@ form.addEventListener("submit", async (e) => {
     const firstPage = pages[0];
     const { height } = firstPage.getSize();
 
-    // Preenche campos no PDF
+     // Preenche campos no PDF
     firstPage.drawText(dados.nome, { x:130, y:height-268, size:12, font });
-    if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-312, size:12, font });
-    firstPage.drawText(dados.cpf, { x:360, y:height-304, size:12, font });
-    firstPage.drawText(dados.rg, { x:120, y:height-329, size:12, font });
-    firstPage.drawText(dados.telefone, { x:380, y:height-327, size:12, font });
-    firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:60, y:86, size:12, font });
-    firstPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:40, y:71, size:12, font });
+    if(dados.nomeSocial) firstPage.drawText(dados.nomeSocial, { x:180, y:height-288, size:12, font });
+    firstPage.drawText(dados.cpf, { x:360, y:height-290, size:12, font });
+    firstPage.drawText(dados.rg, { x:120, y:height-303, size:12, font });
+    firstPage.drawText(dados.telefone, { x:380, y:height-313, size:12, font });
+    firstPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:80, size:12, font });
+    firstPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:65, size:12, font });
 
     if(pages.length > 1){
       const secondPage = pages[1];
       const { height: h2 } = secondPage.getSize();
-      secondPage.drawText(dados.nome, { x:250, y:h2-335, size:12, font });
-      secondPage.drawText(new Date().toLocaleDateString("pt-BR"), { x:230, y:h2-295, size:12, font });
-      secondPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:130, size:12, font });
-      secondPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:115, size:12, font });
+      secondPage.drawText(dados.nome, { x:250, y:h2-320, size:12, font });
+      secondPage.drawText(new Date().toLocaleDateString("pt-BR"), { x:230, y:h2-300, size:12, font });
+      secondPage.drawText(`Assinado digitalmente por: ${dados.nome}`, { x:50, y:100, size:12, font });
+      secondPage.drawText(`Data: ${new Date().toLocaleDateString("pt-BR")}`, { x:50, y:85, size:12, font });
     }
 
     const pdfBytes = await pdfDoc.save();
@@ -144,6 +144,7 @@ function blobParaBase64(blob) {
 </script>
 </body>
 </html>
+
 
 
 
